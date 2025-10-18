@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Drinkquiz 🍸</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    h1, h2 { text-align: center; }
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    input, select, button {
+      margin: 5px 0;
+      padding: 8px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      width: 100%;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover { background: #0056b3; }
+    .result {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .correct { background: #c8f7c5; }
+    .partial { background: #fff3cd; }
+    .wrong { background: #f8d7da; }
+    .recipe {
+      background: #e9f7ef;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+    }
+    #nextBtn { background: #28a745; }
+    #nextBtn:hover { background: #218838; }
+  </style>
+</head>
+<body>
+  <h1>Drinkquiz 🍹</h1>
+  <div id="quiz"></div>
+
+  <script>
+    const categories = {
+      "Alkohol": ["Vodka", "Gin", "Ljus Rom", "Mörk Rom", "Whisky", "Tequila", "Cointreau", "Campari"],
+      "Juice": ["Apelsinjuice", "Limejuice", "Citronjuice"],
+      "Frukt / Garnering": ["Limeklyfta", "Apelsinskiva", "Körsbär", "Mynta"],
+      "Sötning": ["Sockerlag", "Grenadin"],
+      "Övrigt": ["Tonic", "Sodavatten", "Cola", "Ginger Beer"]
+    };
+
+    const drinks = [
+      { name:"Gin & Tonic", ingredients:["Gin","Tonic","Limeklyfta"], recipe:[
+        {item:"Gin",amount:"4 cl"},
+        {item:"Tonic",amount:"Toppa upp"},
+        {item:"Limeklyfta",amount:"Garnering"}
+      ], steps:"Fyll glas med is, häll gin, toppa med tonic. Garnera med limeklyfta." },
+
+      { name:"Margarita", ingredients:["Tequila","Cointreau","Limejuice","Sockerlag"], recipe:[
+        {item:"Tequila",amount:"4 cl"},
+        {item:"Cointreau",amount:"2 cl"},
+        {item:"Limejuice",amount:"3 cl"},
+        {item:"Sockerlag",amount:"1 cl"}
+      ], steps:"Skaka med is, sila upp i kylt cocktailglas." }
+    ];
+
+    const allIngredients = Object.values(categories).flat();
+    const quizDiv = document.getElementById("quiz");
+    let currentDrink = drinks[Math.floor(Math.random() * drinks.length)];
+    renderQuiz(currentDrink);
+
+    function renderQuiz(drink) {
+      quizDiv.innerHTML = `
+        <div class="card">
+          <h2>${drink.name}</h2>
+          <div id="ingredients"></div>
+          <button id="klar">Klar</button>
+          <button id="nextBtn">Nästa drink</button>
+          <div id="feedback"></div>
+        </div>
+      `;
+      document.getElementById("ingredients").appendChild(createIngredientRow());
+      document.getElementById("klar").addEventListener("click", () => checkAnswers(drink));
+      document.getElementById("nextBtn").addEventListener("click", nextDrink);
+    }
+
+    function createIngredientRow() {
+      const row = document.createElement("div");
+      row.classList.add("ingredient-row");
+
+      const input = document.createElement("input");
+      input.setAttribute("list", "ingredients-list");
+      input.placeholder = "Skriv ingrediens...";
+
+      const datalist = document.createElement("datalist");
+      datalist.id = "ingredients-list";
+      allIngredients.forEach(ing => {
+        const opt = document.createElement("option");
+        opt.value = ing;
+        datalist.appendChild(opt);
+      });
+
+      const select = document.createElement("select");
+      select.innerHTML = `
+        <option value="">Välj roll...</option>
+        <option value="cl">cl</option>
+        <option value="dash">dash</option>
+        <option value="toppa">Toppa upp</option>
+        <option value="garnering">Garnering</option>
+      `;
+
+      const amount = document.createElement("input");
+      amount.placeholder = "Mängd (t.ex. 4)";
+      amount.style.display = "none";
+
+      select.addEventListener("change", () => {
+        if (["cl", "dash"].includes(select.value)) {
+          amount.style.display = "block";
+        } else {
+          amount.style.display = "none";
+        }
+      });
+
+      const addBtn = document.createElement("button");
+      addBtn.textContent = "Lägg till nästa";
+      addBtn.addEventListener("click", () => {
+        if (input.value.trim()) {
+          document.getElementById("ingredients").appendChild(createIngredientRow());
+          addBtn.disabled = true;
+        }
+      });
+
+      row.appendChild(input);
+      row.appendChild(datalist);
+      row.appendChild(select);
+      row.appendChild(amount);
+      row.appendChild(addBtn);
+      return row;
+    }
+
+    function checkAnswers(drink) {
+      const rows = document.querySelectorAll(".ingredient-row");
+      const resultDiv = document.getElementById("feedback");
+      resultDiv.innerHTML = "";
+
+      const answers = Array.from(rows).map(r => {
+        const item = r.querySelector("input[list]").value.trim();
+        const role = r.querySelector("select").value;
+        let amount = r.querySelectorAll("input")[1]?.value.trim() || "";
+
+        if (role === "cl" && amount) amount += " cl";
+        if (role === "dash" && amount) amount += " dash";
+        if (role === "toppa") amount = "Toppa upp";
+        if (role === "garnering" && !amount) amount = "Garnering";
+
+        return { item, amount };
+      });
+
+      drink.recipe.forEach(r => {
+        const match = answers.find(a => a.item.toLowerCase() === r.item.toLowerCase());
+        const res = document.createElement("div");
+
+        if (!match) {
+          res.textContent = `${r.item}: ❌ saknas`;
+          res.className = "result wrong";
+        } else if (match.amount.toLowerCase() === r.amount.toLowerCase()) {
+          res.textContent = `${r.item}: ✅ rätt (${r.amount})`;
+          res.className = "result correct";
+        } else {
+          res.textContent = `${r.item}: ⚠️ rätt ingrediens men fel mängd (${match.amount || "ingen mängd"})`;
+          res.className = "result partial";
+        }
+
+        resultDiv.appendChild(res);
+      });
+    }
+
+    function nextDrink() {
+      currentDrink = drinks[Math.floor(Math.random() * drinks.length)];
+      renderQuiz(currentDrink);
+    }
+  </script>
+</body>
+</html>
