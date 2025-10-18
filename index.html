@@ -61,6 +61,14 @@ button:hover { background: #0056b3; }
   align-items: center;
   margin: 0 auto;
 }
+
+/* Responsiv layout: 1 kolumn på smalare skärmar */
+@media (max-width: 600px) {
+  #checkboxes {
+    grid-template-columns: auto 1fr; /* checkbox + namn per rad */
+    gap: 10px 10px;
+  }
+}
 </style>
 </head>
 <body>
@@ -327,9 +335,9 @@ function nextDrink(){
     document.getElementById("backToSelect").addEventListener("click",()=>{
       document.getElementById("drinkList").style.display="block";
       quizDiv.innerHTML="";
-      totalCorrect = 0;        
-      selectedDrinks = [];      
-      scoreDiv.textContent = ""; 
+      totalCorrect = 0;
+      selectedDrinks = [];
+      scoreDiv.textContent = "";
       drinks.forEach(d => { d.firstAttemptCorrect = false; d.seenHelp = false; });
     });
     return;
