@@ -25,7 +25,7 @@ button:hover { background: #0056b3; }
 /* 4-kolumns tabell-layout för drinkval */
 #checkboxes {
   display: grid;
-  grid-template-columns: auto 1fr auto 1fr; /* checkbox, namn, checkbox, namn */
+  grid-template-columns: auto 1fr auto 1fr;
   gap: 10px 20px;
   align-items: start;
 }
@@ -65,9 +65,27 @@ button:hover { background: #0056b3; }
 /* Responsiv layout: 1 kolumn på smalare skärmar */
 @media (max-width: 600px) {
   #checkboxes {
-    grid-template-columns: auto 1fr; /* checkbox + namn per rad */
+    grid-template-columns: auto 1fr;
     gap: 10px 10px;
   }
+}
+
+/* Centrering av "Välj drinkar igen"-knappen */
+#backToSelect {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 20px auto 0 auto;
+  padding: 10px 20px;
+  font-size: 1rem;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+#backToSelect:hover {
+  background: #0056b3;
 }
 </style>
 </head>
@@ -104,7 +122,6 @@ const categories = {
     "Sodavatten", "Tonic", "Cola", "Ginger Beer", "Angostura", "Kaffe", "Mjölk", "Grädde", "Äggvita"
   ]
 };
-
 const drinks = [
   { name:"Gin & Tonic", ingredients:["Gin","Tonic","Limeklyfta"], recipe:[{item:"Gin",amount:"4 cl"},{item:"Tonic",amount:"Toppa upp"}], steps:"Fyll glas med is, häll gin, toppa med tonic. Garnera med limeklyfta." },
   { name:"Screwdriver", ingredients:["Vodka","Apelsinjuice"], recipe:[{item:"Vodka",amount:"4 cl"},{item:"Apelsinjuice",amount:"Toppa upp"}], steps:"Fyll glas med is, häll vodka, toppa med apelsinjuice, rör om." },
